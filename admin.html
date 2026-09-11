@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AM Standard — Admin Panel</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+  body { background:#0f0f14; color:#fff; min-height:100vh; }
+
+  .login-wrap { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:20px; }
+  .login-box { background:#1a1a24; padding:40px; border-radius:15px; width:100%; max-width:400px; box-shadow:0 10px 40px rgba(0,0,0,0.5); }
+  .login-box h1 { color:#e63946; text-align:center; margin-bottom:8px; font-size:28px; }
+  .login-box p { text-align:center; color:#888; margin-bottom:25px; font-size:14px; }
+  .login-box input { width:100%; padding:14px; margin-bottom:15px; background:#0f0f14; border:1px solid #333; border-radius:8px; color:#fff; font-size:15px; outline:none; }
+  .login-box input:focus { border-color:#e63946; }
+  .login-box button { width:100%; padding:14px; background:#e63946; color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:700; cursor:pointer; }
+  .login-box button:hover { background:#c1121f; }
+  .error { color:#ff4d4d; font-size:13px; text-align:center; margin-top:10px; min-height:18px; }
+
+  .dashboard { display:none; padding:20px; max-width:1200px; margin:auto; }
+  .top-bar { display:flex; justify-content:space-between; align-items:center; padding:15px 0; border-bottom:1px solid #222; margin-bottom:25px; flex-wrap:wrap; gap:10px; }
+  .top-bar h2 { color:#e63946; }
+  .top-bar .user-info { display:flex; align-items:center; gap:15px; font-size:14px; color:#aaa; }
+  .logout-btn { padding:8px 18px; background:#333; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:13px; }
+  .logout-btn:hover { background:#e63946; }
+
+  .form-card { background:#1a1a24; padding:25px; border-radius:12px; margin-bottom:25px; }
+  .form-card h3 { margin-bottom:20px; color:#fff; }
+  .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:15px; }
+  .form-grid input, .form-grid textarea { padding:12px; background:#0f0f14; border:1px solid #333; border-radius:8px; color:#fff; font-size:14px; outline:none; font-family:inherit; }
+  .form-grid input:focus, .form-grid textarea:focus { border-color:#e63946; }
+  .form-grid textarea { resize:vertical; min-height:80px; grid-column:1/-1; }
+  .form-actions { margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; }
+  .btn-primary { padding:12px 30px; background:#e63946; color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-size:15px; }
+  .btn-primary:hover { background:#c1121f; }
+  .btn-secondary { padding:12px 30px; background:#333; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:15px; }
+
+  .products-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+  .products-header h3 { color:#fff; }
+  .product-count { background:#e63946; padding:4px 12px; border-radius:20px; font-size:13px; }
+  .product-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:15px; }
+  .product-card { background:#1a1a24; border-radius:10px; overflow:hidden; }
+  .product-card img { width:100%; height:160px; object-fit:cover; background:#0f0f14; }
+  .product-card .info { padding:15px; }
+  .product-card h4 { font-size:15px; margin-bottom:8px; }
+  .product-card .price { color:#e63946; font-weight:700; font-size:18px; margin-bottom:10px; }
+  .product-card .desc { font-size:12px; color:#888; margin-bottom:12px; height:32px; overflow:hidden; }
+  .product-card .actions { display:flex; gap:8px; }
+  .product-card .actions button { flex:1; padding:8px; border:none; border-radius:6px; cursor:pointer; font-size:13px; font-weight:600; }
+  .btn-edit { background:#2a9d8f; color:#fff; }
+  .btn-delete { background:#e63946; color:#fff; }
+  .empty { text-align:center; padding:40px; color:#666; }
+
+  .toast { position:fixed; top:20px; right:20px; padding:15px 25px; background:#2a9d8f; color:#fff; border-radius:8px; font-weight:600; z-index:1000; transform:translateX(400px); transition:0.3s; }
+  .toast.show { transform:translateX(0); }
+  .toast.error { background:#e63946; }
+</style>
+</head>
+<body>
+
+<div class="login-wrap" id="loginScreen">
+  <div class="login-box">
+    <h1>AM Standard</h1>
+    <p>Admin Panel Login</p>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <div class="error" id="errorMsg"></div>
+  </div>
+</div>
+
+<div class="dashboard" id="dashboard">
+  <div class="top-bar">
+    <h2>AM Standard — Admin</h2>
+    <div class="user-info">
+      <span id="userEmail"></span>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h3 id="formTitle">➕ Add New Product</h3>
+    <div class="form-grid">
+      <input type="text" id="pName" placeholder="Product Name">
+      <input type="number" id="pPrice" placeholder="Price (Rs.)">
+      <input type="number" id="pOldPrice" placeholder="Old Price (optional)">
+      <input type="text" id="pCategory" placeholder="Category (e.g. Electronics)">
+      <input type="text" id="pImage" placeholder="Image URL" style="grid-column:1/-1;">
+      <textarea id="pDesc" placeholder="Description"></textarea>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="saveProduct()" id="saveBtn">Add Product</button>
+      <button class="btn-secondary" onclick="resetForm()" id="cancelBtn" style="display:none;">Cancel</button>
+    </div>
+  </div>
+
+  <div class="products-header">
+    <h3>📦 Your Products</h3>
+    <span class="product-count" id="productCount">0</span>
+  </div>
+  <div class="product-grid" id="productGrid"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCwdwGTo8UOutizYYxIeVJ1bOvZ2qeAdyo",
+    authDomain: "am-standard-2ebe6.firebaseapp.com",
+    projectId: "am-standard-2ebe6",
+    storageBucket: "am-standard-2ebe6.firebasestorage.app",
+    messagingSenderId: "57270824753",
+    appId: "1:57270824753:web:be293fe370e42f37ad0a10",
+    measurementId: "G-44W80T1N5Y"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let editingId = null;
+
+  window.login = async function() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const errorEl = document.getElementById('errorMsg');
+    if(!email || !password) { errorEl.textContent = "Email aur password dono daalein"; return; }
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      errorEl.textContent = "";
+    } catch(err) {
+      errorEl.textContent = "❌ Galat email ya password";
+    }
+  };
+
+  window.logout = function() { signOut(auth); };
+
+  onAuthStateChanged(auth, (user) => {
+    if(user) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      document.getElementById('userEmail').textContent = user.email;
+      loadProducts();
+    } else {
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('dashboard').style.display = 'none';
+    }
+  });
+
+  window.saveProduct = async function() {
+    const name = document.getElementById('pName').value.trim();
+    const price = document.getElementById('pPrice').value;
+    const oldPrice = document.getElementById('pOldPrice').value;
+    const category = document.getElementById('pCategory').value.trim();
+    const image = document.getElementById('pImage').value.trim();
+    const desc = document.getElementById('pDesc').value.trim();
+
+    if(!name || !price) { showToast("Naam aur price zaroori hai", true); return; }
+
+    const data = {
+      name, price: Number(price),
+      oldPrice: oldPrice ? Number(oldPrice) : null,
+      category: category || "General",
+      image: image || "https://via.placeholder.com/400",
+      desc: desc || "",
+      createdAt: Date.now()
+    };
+
+    try {
+      if(editingId) {
+        await updateDoc(doc(db, "products", editingId), data);
+        showToast("✅ Product update ho gaya!");
+      } else {
+        await addDoc(collection(db, "products"), data);
+        showToast("✅ Product add ho gaya!");
+      }
+      resetForm();
+      loadProducts();
+    } catch(err) {
+      showToast("❌ Error: " + err.message, true);
+    }
+  };
+
+  async function loadProducts() {
+    const grid = document.getElementById('productGrid');
+    grid.innerHTML = '<div class="empty">Loading...</div>';
+    try {
+      const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+      const products = [];
+      snap.forEach(d => products.push({ id: d.id, ...d.data() }));
+      
+      document.getElementById('productCount').textContent = products.length;
+
+      if(products.length === 0) {
+        grid.innerHTML = '<div class="empty">Abhi koi product nahi. Upar form se add karein.</div>';
+        return;
+      }
+
+      grid.innerHTML = products.map(p => `
+        <div class="product-card">
+          <img src="${p.image}" onerror="this.src='https://via.placeholder.com/400'">
+          <div class="info">
+            <h4>${p.name}</h4>
+            <div class="price">Rs. ${p.price} ${p.oldPrice ? `<span style="color:#666;text-decoration:line-through;font-size:13px;">Rs. ${p.oldPrice}</span>` : ''}</div>
+            <div class="desc">${p.desc || 'No description'}</div>
+            <div class="actions">
+              <button class="btn-edit" onclick="editProduct('${p.id}','${escapeStr(p.name)}','${p.price}','${p.oldPrice || ''}','${escapeStr(p.category)}','${escapeStr(p.image)}','${escapeStr(p.desc)}')">Edit</button>
+              <button class="btn-delete" onclick="deleteProduct('${p.id}')">Delete</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } catch(err) {
+      grid.innerHTML = '<div class="empty">Error: ' + err.message + '</div>';
+    }
+  }
+
+  function escapeStr(s) { return (s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
+  window.editProduct = function(id, name, price, oldPrice, category, image, desc) {
+    editingId = id;
+    document.getElementById('pName').value = name;
+    document.getElementById('pPrice').value = price;
+    document.getElementById('pOldPrice').value = oldPrice;
+    document.getElementById('pCategory').value = category;
+    document.getElementById('pImage').value = image;
+    document.getElementById('pDesc').value = desc;
+    document.getElementById('formTitle').textContent = "✏️ Edit Product";
+    document.getElementById('saveBtn').textContent = "Update Product";
+    document.getElementById('cancelBtn').style.display = 'inline-block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  window.deleteProduct = async function(id) {
+    if(!confirm("Pakka delete karna hai?")) return;
+    try {
+      await deleteDoc(doc(db, "products", id));
+      showToast("🗑️ Product delete ho gaya");
+      loadProducts();
+    } catch(err) {
+      showToast("❌ Error: " + err.message, true);
+    }
+  };
+
+  window.resetForm = function() {
+    editingId = null;
+    ['pName','pPrice','pOldPrice','pCategory','pImage','pDesc'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('formTitle').textContent = "➕ Add New Product";
+    document.getElementById('saveBtn').textContent = "Add Product";
+    document.getElementById('cancelBtn').style.display = 'none';
+  };
+
+  function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (isError ? ' error' : '');
+    setTimeout(() => t.className = 'toast', 3000);
+  }
+</script>
+
+</body>
+  </html>

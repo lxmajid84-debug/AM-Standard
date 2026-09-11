@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AM Standard — Premium Online Store</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+  body { background:#f8f8f8; color:#111; }
+
+  /* HEADER */
+  header { background:#111; padding:15px 20px; display:flex; align-items:center; gap:20px; position:sticky; top:0; z-index:100; flex-wrap:wrap; }
+  .logo { font-size:26px; font-weight:800; color:#fff; letter-spacing:-1px; cursor:pointer; }
+  .logo span { color:#e63946; }
+  .search { flex:1; display:flex; max-width:600px; }
+  .search input { flex:1; padding:12px 15px; border:none; border-radius:8px 0 0 8px; outline:none; font-size:15px; background:#1f1f1f; color:#fff; }
+  .search input::placeholder { color:#888; }
+  .search button { padding:12px 22px; background:#e63946; color:#fff; border:none; border-radius:0 8px 8px 0; cursor:pointer; font-weight:600; }
+  .search button:hover { background:#c1121f; }
+
+  .nav-icons { display:flex; gap:15px; margin-left:auto; }
+  .icon-btn { background:#1f1f1f; color:#fff; border:none; padding:10px 15px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; position:relative; display:flex; align-items:center; gap:6px; transition:0.3s; }
+  .icon-btn:hover { background:#e63946; }
+  .icon-btn .count { background:#e63946; color:#fff; font-size:11px; padding:2px 7px; border-radius:10px; font-weight:700; }
+  .icon-btn:hover .count { background:#fff; color:#e63946; }
+
+  /* CATEGORY BAR */
+  .catbar { background:#fff; padding:12px 20px; display:flex; gap:12px; overflow-x:auto; border-bottom:1px solid #eee; }
+  .catbar a { color:#333; text-decoration:none; white-space:nowrap; padding:7px 16px; border-radius:20px; font-size:14px; font-weight:500; cursor:pointer; transition:0.3s; background:#f0f0f0; }
+  .catbar a:hover, .catbar a.active { background:#e63946; color:#fff; }
+
+  /* HERO */
+  .hero { margin:20px; border-radius:20px; background:linear-gradient(135deg,#111 0%, #e63946 100%); color:#fff; padding:60px 40px; position:relative; overflow:hidden; }
+  .hero::after { content:''; position:absolute; right:-50px; top:-50px; width:200px; height:200px; background:rgba(255,255,255,0.1); border-radius:50%; }
+  .hero h1 { font-size:40px; margin-bottom:15px; position:relative; z-index:1; }
+  .hero p { font-size:18px; opacity:0.9; margin-bottom:25px; position:relative; z-index:1; }
+  .hero button { padding:14px 35px; background:#fff; color:#111; border:none; border-radius:30px; font-weight:700; font-size:15px; cursor:pointer; transition:0.3s; position:relative; z-index:1; }
+  .hero button:hover { background:#e63946; color:#fff; }
+
+  /* PRODUCTS */
+  .section-title { padding:25px 20px 10px; font-size:22px; font-weight:700; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px; padding:10px 20px 40px; }
+  .card { background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.06); transition:0.3s; position:relative; }
+  .card:hover { transform:translateY(-5px); box-shadow:0 10px 30px rgba(0,0,0,0.12); }
+  .card img { width:100%; height:220px; object-fit:cover; }
+  .wish-btn { position:absolute; top:10px; right:10px; background:#fff; width:38px; height:38px; border-radius:50%; border:none; cursor:pointer; font-size:16px; box-shadow:0 2px 8px rgba(0,0,0,0.15); transition:0.3s; }
+  .wish-btn:hover, .wish-btn.active { background:#e63946; color:#fff; }
+  .badge { position:absolute; top:10px; left:10px; background:#e63946; color:#fff; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+  .card-body { padding:15px; }
+  .card-body h3 { font-size:14px; font-weight:600; margin-bottom:8px; height:38px; overflow:hidden; }
+  .rating { font-size:12px; color:#f4a261; margin-bottom:8px; }
+  .price { font-size:20px; font-weight:800; color:#e63946; }
+  .old-price { font-size:13px; color:#999; text-decoration:line-through; margin-left:8px; }
+  .cart-btn { width:100%; margin-top:12px; padding:11px; background:#111; color:#fff; border:none; border-radius:8px; font-weight:600; cursor:pointer; transition:0.3s; }
+  .cart-btn:hover { background:#e63946; }
+
+  /* FEATURES */
+  .features { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; padding:30px 20px; background:#fff; margin:20px; border-radius:16px; }
+  .feature { text-align:center; padding:20px; }
+  .feature .icon { font-size:35px; margin-bottom:10px; }
+  .feature h4 { margin-bottom:5px; color:#111; }
+  .feature p { font-size:13px; color:#666; }
+
+  /* SIDEBAR */
+  .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; display:none; }
+  .overlay.show { display:block; }
+  .sidebar { position:fixed; top:0; right:-420px; width:400px; max-width:90vw; height:100vh; background:#fff; z-index:201; transition:0.3s; display:flex; flex-direction:column; }
+  .sidebar.open { right:0; }
+  .sidebar-header { padding:20px; background:#111; color:#fff; display:flex; justify-content:space-between; align-items:center; }
+  .sidebar-header h3 { font-size:18px; }
+  .close-btn { background:none; border:none; color:#fff; font-size:28px; cursor:pointer; line-height:1; }
+  .sidebar-body { flex:1; overflow-y:auto; padding:15px; }
+  .sidebar-item { display:flex; gap:12px; padding:12px; border-bottom:1px solid #eee; }
+  .sidebar-item img { width:70px; height:70px; object-fit:cover; border-radius:8px; }
+  .sidebar-item .info { flex:1; }
+  .sidebar-item h4 { font-size:14px; margin-bottom:5px; }
+  .sidebar-item .item-price { color:#e63946; font-weight:700; font-size:15px; }
+  .qty-controls { display:flex; align-items:center; gap:8px; margin-top:8px; }
+  .qty-controls button { width:28px; height:28px; border:1px solid #ddd; background:#fff; border-radius:6px; cursor:pointer; font-weight:700; font-size:14px; }
+  .qty-controls button:hover { background:#e63946; color:#fff; border-color:#e63946; }
+  .qty-controls span { font-size:14px; font-weight:600; min-width:20px; text-align:center; }
+  .remove-btn { background:none; border:none; color:#e63946; cursor:pointer; font-size:12px; margin-top:5px; text-decoration:underline; }
+  .empty-cart { text-align:center; padding:50px 20px; color:#888; }
+
+  .sidebar-footer { padding:20px; border-top:2px solid #eee; background:#fafafa; }
+  .total-row { display:flex; justify-content:space-between; font-size:18px; font-weight:800; margin-bottom:15px; }
+  .total-row span:last-child { color:#e63946; }
+  .checkout-btn { width:100%; padding:15px; background:#25D366; color:#fff; border:none; border-radius:10px; font-size:16px; font-weight:700; cursor:pointer; transition:0.3s; }
+  .checkout-btn:hover { background:#128C7E; }
+
+  /* CHECKOUT FORM */
+  .checkout-form { padding:20px; display:none; }
+  .checkout-form.show { display:block; }
+  .checkout-form h3 { margin-bottom:15px; }
+  .checkout-form input, .checkout-form textarea { width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px; font-size:14px; outline:none; font-family:inherit; }
+  .checkout-form input:focus, .checkout-form textarea:focus { border-color:#e63946; }
+  .checkout-form button { width:100%; padding:14px; background:#25D366; color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer; margin-bottom:8px; }
+  .checkout-form .back-btn { background:#333; }
+
+  /* FOOTER */
+  footer { background:#111; color:#ccc; padding:40px 20px 20px; margin-top:30px; }
+  .footer-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:30px; max-width:1200px; margin:auto; }
+  .footer-grid h4 { color:#fff; margin-bottom:15px; }
+  .footer-grid a { display:block; color:#aaa; text-decoration:none; margin-bottom:8px; font-size:14px; cursor:pointer; }
+  .footer-grid a:hover { color:#e63946; }
+  .copyright { text-align:center; margin-top:30px; padding-top:20px; border-top:1px solid #333; font-size:13px; }
+  .loading { text-align:center; padding:60px; color:#888; grid-column:1/-1; }
+
+  @media(max-width:768px){ .hero h1 { font-size:26px; } .hero { padding:35px 20px; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo" onclick="location.reload()">AM <span>Standard</span></div>
+  <div class="search">
+    <input type="text" id="searchInput" placeholder="Search products...">
+    <button onclick="filterProducts()">🔍</button>
+  </div>
+  <div class="nav-icons">
+    <button class="icon-btn" onclick="openSidebar('wishlist')">❤️ <span class="count" id="wishCount">0</span></button>
+    <button class="icon-btn" onclick="openSidebar('cart')">🛒 <span class="count" id="cartCount">0</span></button>
+  </div>
+</header>
+
+<div class="catbar" id="catbar">
+  <a class="active" onclick="selectCat(this, 'all')">All</a>
+  <a onclick="selectCat(this, 'Electronics')">Electronics</a>
+  <a onclick="selectCat(this, 'Home')">Home</a>
+  <a onclick="selectCat(this, 'Office')">Office</a>
+  <a onclick="selectCat(this, 'Toy')">Toy</a>
+  <a onclick="selectCat(this, 'Women')">Women</a>
+  <a onclick="selectCat(this, 'Men')">Men</a>
+</div>
+
+<div class="hero">
+  <h1>AM Standard Mega Sale</h1>
+  <p>Premium quality products at unbeatable prices</p>
+  <button onclick="scrollToProducts()">Shop Now →</button>
+</div>
+
+<div class="section-title">🔥 All Products</div>
+
+<div class="grid" id="productGrid">
+  <div class="loading">Products load ho rahe hain...</div>
+</div>
+
+<div class="features">
+  <div class="feature"><div class="icon">💳</div><h4>Cash on Delivery</h4><p>Pay when you receive</p></div>
+  <div class="feature"><div class="icon">↩️</div><h4>Easy Returns</h4><p>7 days return policy</p></div>
+  <div class="feature"><div class="icon">🔒</div><h4>Secure Order</h4><p>Direct WhatsApp order</p></div>
+  <div class="feature"><div class="icon">🎧</div><h4>24/7 Support</h4><p>Always here to help</p></div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div><h4>AM Standard</h4><p style="font-size:14px;">Your trusted online store for premium products.</p></div>
+    <div><h4>Quick Links</h4><a>About</a><a>Contact</a><a>Blog</a></div>
+    <div><h4>Categories</h4><a>Electronics</a><a>Fashion</a><a>Home</a></div>
+    <div><h4>Follow Us</h4><a>📘 Facebook</a><a>📷 Instagram</a><a>▶️ YouTube</a></div>
+  </div>
+  <div class="copyright">© 2025 AM Standard. All Rights Reserved.</div>
+</footer>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h3 id="sidebarTitle">🛒 Cart</h3>
+    <button class="close-btn" onclick="closeSidebar()">×</button>
+  </div>
+  <div class="sidebar-body" id="sidebarBody"></div>
+  <div class="sidebar-footer" id="sidebarFooter" style="display:none;">
+    <div class="total-row"><span>Total:</span><span id="cartTotal">Rs. 0</span></div>
+    <button class="checkout-btn" onclick="showCheckout()">📱 Order on WhatsApp</button>
+  </div>
+  <div class="checkout-form" id="checkoutForm">
+    <h3>Your Details</h3>
+    <input type="text" id="cName" placeholder="Your Name">
+    <input type="tel" id="cPhone" placeholder="Phone Number">
+    <textarea id="cAddress" placeholder="Delivery Address" rows="3"></textarea>
+    <button onclick="sendWhatsApp()">✅ Confirm Order on WhatsApp</button>
+    <button class="back-btn" onclick="hideCheckout()">← Back to Cart</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCwdwGTo8UOutizYYxIeVJ1bOvZ2qeAdyo",
+    authDomain: "am-standard-2ebe6.firebaseapp.com",
+    projectId: "am-standard-2ebe6",
+    storageBucket: "am-standard-2ebe6.firebasestorage.app",
+    messagingSenderId: "57270824753",
+    appId: "1:57270824753:web:be293fe370e42f37ad0a10",
+    measurementId: "G-44W80T1N5Y"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const WHATSAPP_NUMBER = "923157581234";
+
+  let allProducts = [];
+  let currentCat = 'all';
+  let cart = JSON.parse(localStorage.getItem('am_cart') || '[]');
+  let wishlist = JSON.parse(localStorage.getItem('am_wishlist') || '[]');
+  let currentView = 'cart';
+
+  async function loadProducts() {
+    const grid = document.getElementById('productGrid');
+    try {
+      const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+      allProducts = [];
+      snap.forEach(d => allProducts.push({ id: d.id, ...d.data() }));
+      renderProducts();
+      updateCounts();
+    } catch(err) {
+      grid.innerHTML = '<div class="loading">Error: ' + err.message + '</div>';
+    }
+  }
+
+  window.renderProducts = function() {
+    const grid = document.getElementById('productGrid');
+    const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
+    let filtered = allProducts;
+    if(currentCat !== 'all') filtered = filtered.filter(p => p.category === currentCat);
+    if(search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search) || (p.desc || '').toLowerCase().includes(search));
+
+    if(filtered.length === 0) {
+      grid.innerHTML = '<div class="loading">Koi product nahi mila. Admin panel se add karein.</div>';
+      return;
+    }
+
+    grid.innerHTML = filtered.map(p => {
+      const discount = p.oldPrice ? Math.round((1 - p.price/p.oldPrice) * 100) : 0;
+      const inWishlist = wishlist.some(w => w.id === p.id);
+      return `
+        <div class="card">
+          ${discount > 0 ? `<span class="badge">-${discount}%</span>` : ''}
+          <button class="wish-btn ${inWishlist ? 'active' : ''}" onclick="toggleWishlist('${p.id}')">${inWishlist ? '❤️' : '🤍'}</button>
+          <img src="${p.image}" onerror="this.src='https://via.placeholder.com/400'">
+          <div class="card-body">
+            <h3>${p.name}</h3>
+            <div class="rating">★★★★★</div>
+            <span class="price">Rs. ${p.price}</span>
+            ${p.oldPrice ? `<span class="old-price">Rs. ${p.oldPrice}</span>` : ''}
+            <button class="cart-btn" onclick="addToCart('${p.id}')">Add to Cart</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  };
+
+  window.filterProducts = function() { renderProducts(); };
+
+  window.selectCat = function(el, cat) {
+    currentCat = cat;
+    document.querySelectorAll('.catbar a').forEach(a => a.classList.remove('active'));
+    el.classList.add('active');
+    renderProducts();
+  };
+
+  window.scrollToProducts = function() {
+    document.getElementById('productGrid').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  window.addToCart = function(id) {
+    const p = allProducts.find(x => x.id === id);
+    if(!p) return;
+    const existing = cart.find(x => x.id === id);
+    if(existing) existing.qty++;
+    else cart.push({ id: p.id, name: p.name, price: p.price, image: p.image, qty: 1 });
+    saveCart();
+    updateCounts();
+    showToast("✅ Cart mein add ho gaya!");
+  };
+
+  window.removeFromCart = function(id) {
+    cart = cart.filter(x => x.id !== id);
+    saveCart();
+    updateCounts();
+    renderSidebar();
+  };
+
+  window.changeQty = function(id, delta) {
+    const item = cart.find(x => x.id === id);
+    if(!item) return;
+    item.qty += delta;
+    if(item.qty <= 0) { removeFromCart(id); return; }
+    saveCart();
+    updateCounts();
+    renderSidebar();
+  };
+
+  function saveCart() {
+    localStorage.setItem('am_cart', JSON.stringify(cart));
+  }
+
+  window.toggleWishlist = function(id) {
+    const p = allProducts.find(x => x.id === id);
+    if(!p) return;
+    const idx = wishlist.findIndex(w => w.id === id);
+    if(idx > -1) { wishlist.splice(idx, 1); showToast("🤍 Wishlist se hataya"); }
+    else { wishlist.push({ id: p.id, name: p.name, price: p.price, image: p.image }); showToast("❤️ Wishlist mein add!"); }
+    localStorage.setItem('am_wishlist', JSON.stringify(wishlist));
+    updateCounts();
+    renderProducts();
+  };
+
+  window.removeFromWishlist = function(id) {
+    wishlist = wishlist.filter(x => x.id !== id);
+    localStorage.setItem('am_wishlist', JSON.stringify(wishlist));
+    updateCounts();
+    renderProducts();
+    renderSidebar();
+  };
+
+  function updateCounts() {
+    document.getElementById('cartCount').textContent = cart.reduce((s, i) => s + i.qty, 0);
+    document.getElementById('wishCount').textContent = wishlist.length;
+  }
+
+  window.openSidebar = function(type) {
+    currentView = type;
+    document.getElementById('sidebarTitle').textContent = type === 'cart' ? '🛒 Cart' : '❤️ Wishlist';
+    document.getElementById('overlay').classList.add('show');
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('sidebarBody').style.display = 'block';
+    document.getElementById('checkoutForm').classList.remove('show');
+    renderSidebar();
+  };
+
+  window.closeSidebar = function() {
+    document.getElementById('overlay').classList.remove('show');
+    document.getElementById('sidebar').classList.remove('open');
+    hideCheckout();
+  };
+
+  function renderSidebar() {
+    const body = document.getElementById('sidebarBody');
+    const footer = document.getElementById('sidebarFooter');
+
+    if(currentView === 'cart') {
+      if(cart.length === 0) {
+        body.innerHTML = '<div class="empty-cart">🛒<br><br>Cart khaali hai<br><br>Products add karein!</div>';
+        footer.style.display = 'none';
+        return;
+      }
+      body.innerHTML = cart.map(item => `
+        <div class="sidebar-item">
+          <img src="${item.image}" onerror="this.src='https://via.placeholder.com/100'">
+          <div class="info">
+            <h4>${item.name}</h4>
+            <div class="item-price">Rs. ${item.price}</div>
+            <div class="qty-controls">
+              <button onclick="changeQty('${item.id}', -1)">−</button>
+              <span>${item.qty}</span>
+              <button onclick="changeQty('${item.id}', 1)">+</button>
+            </div>
+            <button class="remove-btn" onclick="removeFromCart('${item.id}')">Remove</button>
+          </div>
+        </div>
+      `).join('');
+      const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+      document.getElementById('cartTotal').textContent = 'Rs. ' + total;
+      footer.style.display = 'block';
+    } else {
+      if(wishlist.length === 0) {
+        body.innerHTML = '<div class="empty-cart">❤️<br><br>Wishlist khaali hai<br><br>Products save karein!</div>';
+        footer.style.display = 'none';
+        return;
+      }
+      body.innerHTML = wishlist.map(item => `
+        <div class="sidebar-item">
+          <img src="${item.image}" onerror="this.src='https://via.placeholder.com/100'">
+          <div class="info">
+            <h4>${item.name}</h4>
+            <div class="item-price">Rs. ${item.price}</div>
+            <button class="remove-btn" onclick="removeFromWishlist('${item.id}')">Remove</button>
+          </div>
+        </div>
+      `).join('');
+      footer.style.display = 'none';
+    }
+  }
+
+  window.showCheckout = function() {
+    document.getElementById('sidebarBody').style.display = 'none';
+    document.getElementById('sidebarFooter').style.display = 'none';
+    document.getElementById('checkoutForm').classList.add('show');
+  };
+
+  window.hideCheckout = function() {
+    document.getElementById('sidebarBody').style.display = 'block';
+    document.getElementById('checkoutForm').classList.remove('show');
+    renderSidebar();
+  };
+
+  window.sendWhatsApp = function() {
+    const name = document.getElementById('cName').value.trim();
+    const phone = document.getElementById('cPhone').value.trim();
+    const address = document.getElementById('cAddress').value.trim();
+
+    if(!name || !phone || !address) { alert("Name, phone, aur address zaroori hai!"); return; }
+    if(cart.length === 0) { alert("Cart khaali hai!"); return; }
+
+    const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+    let msg = `*🛒 NEW ORDER - AM Standard*\n\n`;
+    msg += `*👤 Name:* ${name}\n`;
+    msg += `*📞 Phone:* ${phone}\n`;
+    msg += `*📍 Address:* ${address}\n\n`;
+    msg += `*📦 Products:*\n`;
+    cart.forEach((item, i) => {
+      msg += `${i+1}. ${item.name}\n   Qty: ${item.qty} × Rs. ${item.price} = Rs. ${item.qty * item.price}\n`;
+    });
+    msg += `\n*💰 TOTAL: Rs. ${total}*\n\n`;
+    msg += `Please confirm my order. Thank you!`;
+
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+  };
+
+  document.getElementById('searchInput')?.addEventListener('keyup', (e) => {
+    if(e.key === 'Enter') renderProducts();
+  });
+
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:12px 25px;border-radius:30px;font-weight:600;z-index:9999;box-shadow:0 5px 20px rgba(0,0,0,0.3);';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2000);
+  }
+
+  loadProducts();
+</script>
+
+</body>
+</html>
